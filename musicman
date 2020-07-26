@@ -1,0 +1,33 @@
+#! /bin/zsh
+
+json="/home/xiyizi/snap/google-play-music-desktop-player/current/.config/Google Play Music Desktop Player/json_store/playback.json"
+song=$(cat $json | jq -r '.song.title')
+artist=$(cat $json | jq -r '.song.artist')
+art=$(cat $json | jq -r '.song.albumArt')
+time=$(cat $json | jq -r '.time.current')
+
+
+function makeart() {
+    curl "$art" --output cover.png && convert cover.png -resize 306x306 cover.png
+    }
+
+function maketext() {
+    echo $song by $artist > whosong.txt
+    }
+
+$(maketext)
+$(makeart)
+
+while true; do
+    if [[ "$artist" != "$(cat $json | jq -r '.song.artist')" || "$song" != "$(cat $json | jq -r '.song.title')" ]]; then
+        song=$(cat $json | jq -r '.song.title')
+        artist=$(cat $json | jq -r '.song.artist')
+        $(maketext)
+    fi
+    if [[ "$art" != "$(cat $json | jq -r '.song.albumArt')" ]]; then
+        art=$(cat $json | jq -r '.song.albumArt')
+        $(makeart)
+    fi
+    sleep 1;
+    done
+    
